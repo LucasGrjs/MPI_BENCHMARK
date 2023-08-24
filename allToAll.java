@@ -34,8 +34,8 @@ class test
             buffSend[index] = myself;
         } 
         StringBuilder strSend = new StringBuilder();
-        strSend.append("buffSend myself : " + myself + " ");
-        for(int index = 1; index < tasks * sizeEach; index++)
+        strSend.append("buffSend " + myself + " : ");
+        for(int index = 0; index < tasks * sizeEach; index++)
         {
             strSend.append(" " + buffSend[index]);
         }
@@ -48,7 +48,7 @@ class test
         MPI.COMM_WORLD.allToAll(buffSend, sizeEach, MPI.INT, bufferReceive, sizeEach, MPI.INT);
         
         StringBuilder str = new StringBuilder();
-        str.append("bufferReceive myself : " + myself + " ");
+        str.append("bufferReceive " + myself + " : ");
         for(int index = 0; index < tasks * sizeEach; index++)
         {
             str.append(" " + bufferReceive[index]);
