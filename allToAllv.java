@@ -71,6 +71,8 @@ class test
         int bufferReceiveSize[] = new int[tasks]; // buffer to receive size of incoming buffer in allToAllv
         Arrays.setAll(buffSendSize, i -> rand.nextInt(10) + 1); // set buffer with a random int giving the incoming number of element
         
+        buffSendSize[myself] = 0;
+
         int buffSendData[]; // buffer to send data to all
         buffSendData = fillArrayWithData(buffSendSize, myself); // fill buffer with data to send
 
