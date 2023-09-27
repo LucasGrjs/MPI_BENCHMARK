@@ -19,10 +19,10 @@ class test
     static int[] fillArrayWithData(int[] sizeDataForEach, int myself)
     {
         StringBuilder strSize = new StringBuilder();
-        strSize.append("Sending from " + myself + "  : \n");
+        strSize.append("Sending from rank " + myself + "  : \n");
         for(int index = 0; index < sizeDataForEach.length; index++)
         {
-            strSize.append(sizeDataForEach[index] + " elements to " + index +" \n");
+            strSize.append(sizeDataForEach[index] + " element(s) to " + index +" \n");
         }
         System.out.println(strSize);
         
@@ -43,17 +43,11 @@ class test
     {
         int[] displs = new int[tasks];
         displs[0] = 0;
-        
-        StringBuilder str = new StringBuilder("computeDispl : " + myself + " : "+ "\n");
-        str.append("displs" + 0 + " :: " + displs[0]+ "\n");
 
         for(int index = 1; index < buffSendSize.length; index++)
         {
-            str.append(index + " :: " + buffSendSize[index]+ "\n");
             displs[index] = displs[index-1] + buffSendSize[index-1];
-            str.append("displs" + index + " :: " + displs[index]+ "\n");
         }
-        //System.out.println(str);
         return displs;
     }
 
@@ -67,26 +61,24 @@ class test
         Random rand = new Random();
         rand.setSeed(System.currentTimeMillis() + myself);
         
-        int buffSendSize[]= new int[tasks]; // buffer to send size of incoming buffer to all
         int bufferReceiveSize[] = new int[tasks]; // buffer to receive size of incoming buffer in allToAllv
-        Arrays.setAll(buffSendSize, i -> rand.nextInt(10) + 1); // set buffer with a random int giving the incoming number of element
         
+        int buffSendSize[] = new int[tasks]; // buffer to send size of incoming buffer to all
+        Arrays.setAll(buffSendSize, i -> rand.nextInt(10) + 1); // set buffer with a random int giving the incoming number of element
         buffSendSize[myself] = 0;
 
-        int buffSendData[]; // buffer to send data to all
-        buffSendData = fillArrayWithData(buffSendSize, myself); // fill buffer with data to send
+        int buffSendData[] = fillArrayWithData(buffSendSize, myself); // fill buffer with data to send
 
         MPI.COMM_WORLD.allToAll(buffSendSize, 1, MPI.INT, bufferReceiveSize, 1, MPI.INT); // send to all + receive from all size of incoming buffer
 
         int bufferReceiveData[] = new int[Arrays.stream(bufferReceiveSize).sum()]; // buffer to receive data
-
         int displsSend[] = computeDispl(tasks, buffSendSize, myself); // displs of send buffer
         int displsReceive[] = computeDispl(tasks, bufferReceiveSize, myself); // displs of receive buffer
 
         MPI.COMM_WORLD.allToAllv(buffSendData, buffSendSize, displsSend, MPI.INT, bufferReceiveData, bufferReceiveSize, displsReceive, MPI.INT); // send to all + receive from all with different size
         
         StringBuilder str = new StringBuilder();
-        str.append("bufferReceiveData myself : " + myself + " ");
+        str.append("Rank " + myself + " received : ");
         for(int index = 0; index < bufferReceiveData.length; index++)
         {
             str.append(" " + bufferReceiveData[index]); // read received data

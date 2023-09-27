@@ -12,7 +12,7 @@ import java.util.Random;
 
 class test
 {
-    // allToall, every proc send sizeEach element to other proc
+    // allToall, every proc send numberOfIntToSend element to other proc
     public static void main(String[] args) throws MPIException
     {        
         MPI.Init(args);
@@ -21,35 +21,33 @@ class test
 
         int myself = MPI.COMM_WORLD.getRank(); // rank
         int tasks = MPI.COMM_WORLD.getSize(); // number of process
-        int sizeEach = 3;   
+        int numberOfIntToSend = 3;  // number of int to send
 
-        int buffSend[] = new int[tasks * sizeEach];
+        int buffSend[] = new int[tasks * numberOfIntToSend];
         int buffSendSize[] = new int[tasks];
 
-        int bufferReceive[] = new int[tasks * sizeEach];
-        buffSendSize[0] = sizeEach;
+        int bufferReceive[] = new int[tasks * numberOfIntToSend];
+        buffSendSize[0] = numberOfIntToSend;
 
-        for(int index = 0; index < tasks * sizeEach; index++)
+        for(int index = 0; index < tasks * numberOfIntToSend; index++)
         {
             buffSend[index] = myself;
         } 
         StringBuilder strSend = new StringBuilder();
-        strSend.append("buffSend " + myself + " : ");
-        for(int index = 0; index < tasks * sizeEach; index++)
-        {
-            strSend.append(" " + buffSend[index]);
-        }
+        strSend.append("Rank " + myself + " will send " + numberOfIntToSend + " element(s)");
+
         System.out.println(strSend);
 
         for(int index = 1; index < tasks; index++)
         {
-            buffSendSize[index] = sizeEach;   
+            buffSendSize[index] = numberOfIntToSend;   
         }
-        MPI.COMM_WORLD.allToAll(buffSend, sizeEach, MPI.INT, bufferReceive, sizeEach, MPI.INT);
+
+        MPI.COMM_WORLD.allToAll(buffSend, numberOfIntToSend, MPI.INT, bufferReceive, numberOfIntToSend, MPI.INT);
         
         StringBuilder str = new StringBuilder();
-        str.append("bufferReceive " + myself + " : ");
-        for(int index = 0; index < tasks * sizeEach; index++)
+        str.append("Rank " + myself + " received : ");
+        for(int index = 0; index < tasks * numberOfIntToSend; index++)
         {
             str.append(" " + bufferReceive[index]);
         }

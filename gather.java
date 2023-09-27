@@ -11,43 +11,50 @@ import java.util.List;
 
 class test
 {
-    // proc 0 gather MAXLEN int from other proc
+    // gather numberOfIntToSend int from other proc on targetRank
     public static void main(String[] args) throws MPIException
     {
-        int MAXLEN = 7;
         MPI.Init(args);
+        
+        int numberOfIntToSend = 7; // number of int to send to target rank
+        int myself = MPI.COMM_WORLD.getRank(); // rank of current mpi instance
+        int tasks = MPI.COMM_WORLD.getSize(); // number of process
 
-        int myself = MPI.COMM_WORLD.getRank();
-        int tasks = MPI.COMM_WORLD.getSize();
+        int out[] = new int[numberOfIntToSend]; // buffer to send all data to target rank
 
-        int out[] = new int[MAXLEN];    
-        int value = myself * MAXLEN;
-        for(int i = 0; i < MAXLEN; i++)
+        int targetRank = 2; // rank to send data to
+        if(targetRank >= tasks)
         {
-            out[i] = i;
+            targetRank = 0;
+        }
+
+        StringBuilder str = new StringBuilder();
+
+        str.append("Rank " + myself + " will send " + numberOfIntToSend + " element(s) to rank " + targetRank + " : " + "\n");
+        for(int i = 0; i < numberOfIntToSend; i++)
+        {
+            out[i] = myself; // will buffer with data
+            str.append(out[i] + " ");
         }
         
-        for (int i = 0; i < out.length; i++) {
-            System.out.println("proc N°" + myself + " [" + i + "] = " + out[i]);
-        }
-
-        if(myself == 0) // root gathering data
+        if(myself == targetRank) // root gathering data
         {
-            int in[] = new int[MAXLEN * tasks];
-            MPI.COMM_WORLD.gather(out, MAXLEN, MPI.INT, in, MAXLEN, MPI.INT, 0); // receive
+            int in[] = new int[numberOfIntToSend * tasks]; // buffer to receive all data
+            MPI.COMM_WORLD.gather(out, numberOfIntToSend, MPI.INT, in, numberOfIntToSend, MPI.INT, targetRank); // receive
             
-            System.out.println("DONE GATHER RECV----------- ");
+            str.append("\n\n-----------RECV----------- " + "\n");
             
-            System.out.println("RESULT : ");
+            str.append("Rank " + myself + " received : \n");
             for (int i = 0; i < in.length; i++) {
-                System.out.println("[" + i + "] = " + in[i]);
+                str.append(in[i] + " ");
             }
         }else // others sending data
         {
-            MPI.COMM_WORLD.gather(out, MAXLEN, MPI.INT, 0); // send 
-            System.out.println("DONE SENDING for N°" + myself);
+            MPI.COMM_WORLD.gather(out, numberOfIntToSend, MPI.INT, targetRank); // send 
         }
         
+        System.out.println(str + "\n");
+
         MPI.Finalize();
     }
 }

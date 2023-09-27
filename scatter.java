@@ -19,38 +19,48 @@ class test
 
         int myself = MPI.COMM_WORLD.getRank(); // rank
         int tasks = MPI.COMM_WORLD.getSize(); // number of process
-        int numberOfElementsToSendForEach = 10;
-        int totalNumberOfElementToSend = tasks * numberOfElementsToSendForEach;
+        int numberOfIntToSend = 10;
+        int totalNumberOfElementToSend = tasks * numberOfIntToSend;
+        int[] bufferReceive = new int[numberOfIntToSend];
 
-        if(myself == 0)
+        int targetRank = 3; // rank to send data to
+        if(targetRank >= tasks)
+        {
+            targetRank = 0;
+        }
+
+        if(myself == targetRank)
         { 
-            Random rand = new Random();
-            int numberOfIntToSend = rand.nextInt(10) + 1; // random number of int to send to root
-            System.out.println("Number of tasks : " + tasks);
-            System.out.println("process N°" + myself + ", Number of elements to send : " + totalNumberOfElementToSend);
-
+            StringBuilder str = new StringBuilder();
+            str.append("Rank " + myself + " will send " + numberOfIntToSend + " element(s) to everyone else ");
+            System.out.println(str + "\n");
+            str.setLength(0);
+            
             int[] bufferSend = new int[totalNumberOfElementToSend];
             for(int element = 0; element < totalNumberOfElementToSend; element++)
             {
                 bufferSend[element] = element;  
-                System.out.println("bufferSend["+element+"] : " + element);
             }
-            MPI.COMM_WORLD.scatter(bufferSend, numberOfElementsToSendForEach, MPI.INT, bufferSend, numberOfElementsToSendForEach, MPI.INT, 0);
-            System.out.println("ALL SENT");
-        }else
-        {
-            System.out.println("myself : " + myself);
-            int[] bufferReceive = new int[numberOfElementsToSendForEach];
+            MPI.COMM_WORLD.scatter(bufferSend, numberOfIntToSend, MPI.INT, bufferReceive, numberOfIntToSend, MPI.INT, targetRank);
 
-            System.out.println("scatter : ");
-            MPI.COMM_WORLD.scatter(bufferReceive, numberOfElementsToSendForEach, MPI.INT, bufferReceive, numberOfElementsToSendForEach, MPI.INT, 0);
-
-            System.out.println("result : ");
+            str.append("Rank " + myself + " received : ");
             for(var auto : bufferReceive)
             {
-                System.out.println("auto " + myself + " : " + auto);
+                str.append(auto + " ");
             }
+            System.out.println(str + "\n");
+        }else
+        {
+            MPI.COMM_WORLD.scatter(bufferReceive, numberOfIntToSend, MPI.INT, bufferReceive, numberOfIntToSend, MPI.INT, targetRank);
 
+            
+            StringBuilder str = new StringBuilder();
+            str.append("Rank " + myself + " received : ");
+            for(var auto : bufferReceive)
+            {
+                str.append(auto + " ");
+            }
+            System.out.println(str + "\n");
         }
 
         MPI.Finalize();
