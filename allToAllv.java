@@ -64,8 +64,7 @@ class test
         int bufferReceiveSize[] = new int[tasks]; // buffer to receive size of incoming buffer in allToAllv
         
         int buffSendSize[] = new int[tasks]; // buffer to send size of incoming buffer to all
-        Arrays.setAll(buffSendSize, i -> rand.nextInt(10) + 1); // set buffer with a random int giving the incoming number of element
-        buffSendSize[myself] = 0;
+        Arrays.setAll(buffSendSize, i -> 10000000); // set buffer with a random int giving the incoming number of element
 
         int buffSendData[] = fillArrayWithData(buffSendSize, myself); // fill buffer with data to send
 
@@ -78,10 +77,10 @@ class test
         MPI.COMM_WORLD.allToAllv(buffSendData, buffSendSize, displsSend, MPI.INT, bufferReceiveData, bufferReceiveSize, displsReceive, MPI.INT); // send to all + receive from all with different size
         
         StringBuilder str = new StringBuilder();
-        str.append("Rank " + myself + " received : ");
+        str.append("Rank " + myself + " received : " + bufferReceiveData.length);
         for(int index = 0; index < bufferReceiveData.length; index++)
         {
-            str.append(" " + bufferReceiveData[index]); // read received data
+            //str.append(" " + bufferReceiveData[index]); // read received data
         }
 
         System.out.println(str);

@@ -1,0 +1,7 @@
+#!/bin/bash
+mpirun -np 1 java -cp ext/mpi.jar -XX:+UseG1GC $1
+mpirun -np 2 java -cp ext/mpi.jar -XX:+UseG1GC $1
+mpirun -np 3 java -cp ext/mpi.jar -XX:+UseG1GC $1
+mpirun -np 4 java -cp ext/mpi.jar -XX:+UseG1GC $1
+mpirun -np 5 java -cp ext/mpi.jar -XX:+UseG1GC $1
+mpirun -np 6 java -cp ext/mpi.jar -XX:+UseG1GC $1

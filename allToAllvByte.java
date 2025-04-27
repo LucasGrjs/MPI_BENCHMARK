@@ -70,7 +70,7 @@ class test
         
         for(int index = 0; index < dataToSerialize.length; index++)
         {   
-            if(sizeDataForEach[currentIndex] == 0) // we skip self or empty sized data
+            if(sizeDataForEach[currentIndex] == 0) // we skip empty sized data
             {
                 sizeDataForEach[currentIndex] = 0;
                 currentIndex++;
@@ -123,8 +123,9 @@ class test
         int bufferReceiveSize[] = new int[tasks]; // buffer to receive size of incoming buffer in allToAllv
 
         int buffSendSize[] = new int[tasks]; // buffer to send size of incoming buffer to all
-        Arrays.setAll(buffSendSize, i -> (rand.nextInt(5) + 1)); // set buffer with a random int giving the incoming number of element
-        buffSendSize[myself] = 0;
+        Arrays.setAll(buffSendSize, i -> (900000)); // set buffer with a random int giving the incoming number of element
+        
+        //buffSendSize[myself] = 0;
         int buffSendData[] = fillArrayWithData(buffSendSize, myself);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -137,14 +138,19 @@ class test
         
         MPI.COMM_WORLD.allToAll(buffSendSize, 1, MPI.INT, bufferReceiveSize, 1, MPI.INT); // send to all + receive from all size of incoming buffer
         
-        int displsReceive[] = computeDispl(tasks, bufferReceiveSize, myself); // displs of receive buffer*/
+        int displsReceive[] = computeDispl(tasks, bufferReceiveSize, myself); // displs of receive buffer
 
 
         byte bufferReceiveData[] = new byte[Arrays.stream(bufferReceiveSize).sum()]; // buffer to receive data
 
-        MPI.COMM_WORLD.allToAllv(baos.toByteArray(), buffSendSize, displsSend, MPI.BYTE, bufferReceiveData, bufferReceiveSize, displsReceive, MPI.BYTE); // send to all + receive from all with different size
+        final byte[] final_message = baos.toByteArray();
+
+        System.out.println("total size " + final_message.length +" byte(s)");
+
+        MPI.COMM_WORLD.allToAllv(final_message, buffSendSize, displsSend, MPI.BYTE, bufferReceiveData, bufferReceiveSize, displsReceive, MPI.BYTE); // send to all + receive from all with different size
         
-        StringBuilder str = new StringBuilder("Rank " + myself + " received : \n");
+        System.out.println("allToAllv DONE ");
+        StringBuilder str = new StringBuilder("----Rank " + myself + " received : \n[");
         IntBuffer intBuf = ByteBuffer.wrap(bufferReceiveData).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 
         int[] array = new int[intBuf.remaining()];
@@ -154,7 +160,9 @@ class test
         {
             str.append(array[index]+ " "); // read received data
         }
-        System.out.println(str + "\n");
+        //System.out.println(str + "]\n");
+
+        System.out.println("number of int received : " + array.length); 
         
         MPI.Finalize();
     }

@@ -21,7 +21,7 @@ class test
 
         int myself = MPI.COMM_WORLD.getRank(); // rank
         int tasks = MPI.COMM_WORLD.getSize(); // number of process
-        int numberOfIntToSend = 3;  // number of int to send
+        int numberOfIntToSend = 10000000;  // number of int to send
 
         int buffSend[] = new int[tasks * numberOfIntToSend];
         int buffSendSize[] = new int[tasks];
